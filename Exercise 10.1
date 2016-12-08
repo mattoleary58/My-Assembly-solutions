@@ -1,0 +1,29 @@
+;
+; Data & Code
+;
+
+.data
+message		BYTE	'%d',10,0
+.code
+	main:nop
+
+		invoke version
+		push ebp		;Create stack frame
+		mov ebp,esp
+		mov ecx,0		;start counter on 0
+		push ecx		;push it onto the stack
+	display:
+		pop ecx			;pop it off the stack
+		cmp ecx,20		;for(ecx = 0, ecx < 20, ecx++)
+		jge finish		
+		mov eax,ecx
+		shl eax,2		;(i*4)
+		inc ecx			;increment ecx
+		push ecx		;push it onto the stack cause printf will mess ecx up
+		invoke crt_printf,ADDR message,eax	;print (i*4)
+		jmp display		;Loop back	
+
+	finish:
+		invoke ExitProcess,0
+
+	end main
