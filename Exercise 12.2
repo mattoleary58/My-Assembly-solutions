@@ -1,0 +1,78 @@
+main.asm
+EXTERNDEF counts:NEAR
+
+.data
+numbers	DWORD	9 DUP(1,-15,0,-1,6,-3,0,20,-80)
+
+.code
+	main:nop
+
+		invoke version
+		push OFFSET numbers
+		push LENGTH numbers
+		call counts
+		invoke writeArray,eax,3
+		invoke ExitProcess,0
+
+	end main
+
+counts.asm
+EXTERNDEF counts:NEAR
+
+.data
+a			DWORD	3 DUP(0)
+arrlength	DWORD	0
+pos			DWORD	0
+negs		DWORD	0
+zeros		DWORD	0
+.code
+	main:nop
+
+		invoke version
+	counts:
+		push ebp
+		mov ebp,esp
+		mov ebx,[ebp + 12]	;Store address of the array in ebx
+		mov eax,[ebp + 8]	;store array size in bx
+		mov arrlength,eax
+		mov ecx,0
+
+	getCount:
+		cmp ecx,arrlength
+		jge finish
+		mov eax,ecx
+		mov edx,TYPE a
+		mul edx
+		add eax,ebx
+		mov eax,[eax]
+		cmp eax,0
+		jl  negCount
+		je	zCount
+		inc pos
+		inc ecx
+		jmp getCount
+	
+	negCount:
+		inc negs
+		inc ecx
+		jmp getCount
+
+	zCount:
+		inc zeros
+		inc ecx
+		jmp getCount
+
+	finish:
+		mov eax,OFFSET a
+		mov ecx,negs
+		mov [eax],ecx
+		add eax,TYPE a
+		mov ecx,zeros
+		mov [eax],ecx
+		add eax,TYPE a
+		mov ecx,pos
+		mov [eax],ecx
+		mov eax,OFFSET a
+		pop ebp
+		ret 8
+	end
