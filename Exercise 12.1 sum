@@ -1,0 +1,50 @@
+main.asm
+EXTERNDEF sumArray:NEAR
+
+.data
+numbers	DWORD	3 DUP(1,2,3)
+sumMsg	BYTE	'The sum of the array is: %d',10,0
+.code
+	main:nop
+
+		invoke version
+		push OFFSET numbers
+		push LENGTH numbers
+		call sumArray
+		invoke crt_printf,ADDR sumMsg,eax
+		invoke ExitProcess,0
+
+	end main
+
+sumArray.asm
+EXTERNDEF sumArray:NEAR
+.data
+sum		DWORD	0
+
+.code
+	main:nop
+	sumArray:	
+		invoke version
+		push ebp
+		mov ebp,esp
+		mov esi,[ebp + 12]	;address of array stored in eax
+		mov ebx,[ebp + 8]	;Length of array in ebx
+		mov ecx,0
+	findSum:
+		cmp ecx,ebx
+		jge finish
+		mov eax,ecx
+		mov edx,TYPE esi
+		mul edx				;i*4
+		add eax,esi
+		mov eax,[eax]
+		add sum,eax
+		inc ecx
+		jmp findSum
+
+	finish:
+		mov eax,sum
+		pop ebp
+		ret 8
+
+	end 
