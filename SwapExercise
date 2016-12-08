@@ -1,0 +1,81 @@
+main.asm
+;
+; Data & Code
+;
+EXTERNDEF swap:NEAR
+
+.data
+array		DWORD	10 DUP (2,4,6,8,10,12,14,16,18,20)
+message		BYTE	'Enter index to swap ',0
+.code
+	main:nop
+
+		push OFFSET array				;push array address onto stack
+		invoke readIntegerWithMessage,ADDR message	;reads index1 into eax
+		push eax
+		invoke readIntegerWithMessage,ADDR message	;reads index2 into eax
+		push eax
+		push LENGTH array				;pushes the length of the array
+		call swap					;call swap function
+		invoke writeArray,ADDR array,LENGTH array	;write the array for testing purposes, not necessary in exam
+		invoke ExitProcess,0
+
+	end main
+
+
+
+swap.asm
+;
+; Data & Code
+;
+EXTERNDEF swap:NEAR
+
+.data
+i		DWORD	0
+arrLength	DWORD	0
+index1Element	DWORD	0
+index2Element	DWORD	0
+.code
+	main:nop
+
+	swap:
+		push ebp
+		mov ebp,esp
+		mov eax,[ebp + 8]	;store array length in length variable
+		mov arrLength,eax
+		mov esi,[ebp + 12]	;store index 2 in esi
+		mov ecx,[ebp + 16]	;store index 1 in ecx
+		mov ebx,[ebp + 20]	;store array offset in ebx
+
+	findIndex:
+		mov eax,ecx			;get index 1
+		mov edx,TYPE ebx		;gets byte size of array -> in this case 4
+		mul edx				;(index1 * 4)
+		mov eax,[ebx + eax]		;this stores the element at index1
+		mov index1Element,eax
+		mov eax,esi			;get index 2
+		mov edx,TYPE ebx
+		mul edx				;(index2 * 4)
+		mov eax,[ebx + eax]		;store index2 element in eax
+		mov index2Element,eax		;element in index 2
+		cmp index1Element,eax		;if(array[index1] < array[index2])				
+		jge	endLoop
+		
+		mov eax,ecx			;get index1
+		mov edx,TYPE ebx		;get TYPE size -> in this case 4
+		mul edx				;(i*4) stored in eax
+		mov edx,index2Element		;store index 2 element in edx
+		mov [ebx + eax],edx		;store index 2 element in array[index1]
+		mov eax,esi			;get index2
+		mov edx,TYPE ebx
+		mul edx				;(i*4) stored in eax
+		mov edx,index1Element		;store index 2 element in edx
+		mov [ebx + eax],edx		;store index 1 element in array[index2]
+		jmp endLoop			;finish
+
+	endLoop:
+		pop ebp
+		ret 16				;4*4 = 16 -> 4 times the number of params
+		invoke ExitProcess,0
+
+	end
