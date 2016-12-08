@@ -1,0 +1,73 @@
+Write MASM code to implement the pseudocode function with the following
+signature
+void mapArray(int[] array1,int[] array2,int size) {
+...
+}
+where array1 and array2 are arrays containing size integers and the function
+call mapArray(a1,a2,s) should modify a2 such that
+a2[i] = convert(a1[i]) for 0 = i < size
+
+
+main.asm
+;
+; Data & Code
+;
+EXTERNDEF mapArray:NEAR
+
+.data
+array1		DWORD	10 DUP (1,2,3,4,5,6,7,8,9,10)
+array2		DWORD	10 DUP (2,4,6,8,10,12,14,16,18,20)
+
+.code
+	main:nop
+
+		push OFFSET array1
+		push OFFSET array2
+		push LENGTH array1
+		call mapArray
+		invoke writeArray,ebx,LENGTH array2
+		invoke ExitProcess,0
+
+	end main
+
+mapArray.asm
+;
+; Data & Code
+;
+EXTERNDEF mapArray:NEAR
+
+.data
+i			DWORD	0
+ArrLength	DWORD	0
+index		DWORD	0
+array2Addr	DWORD	0
+.code
+	main:nop
+
+	mapArray:
+		push ebp
+		mov ebp,esp
+		mov eax,[ebp + 8]	;ebx == Length of arrays
+		mov ArrLength,eax	;length = ebx
+		mov ebx,[ebp + 12]	;ebx == Address of array2
+		mov array2Addr,ebx
+		mov ecx,[ebp + 16]	;ecx == array1
+
+	mapLoop:
+		mov eax,ArrLength
+		cmp i,eax			;i <= array.size
+		jge endLoop
+		mov eax,i			;puts index in eax
+		mov edx, 4			;TYPE - in this case 4 bytes
+		mul edx				;i*4
+		mov esi,eax			;store i*4 in esi
+		add eax,ecx			;(i*4) + offset ecx
+		invoke convert,[eax]	;convert value stored in address eax, here convert adds on 17
+		mov [ebx + esi],eax	;move the converted value into (offset + i*4)
+		inc i				;i++
+		jmp mapLoop
+
+	endLoop:
+		pop ebp
+		ret 12
+	end
