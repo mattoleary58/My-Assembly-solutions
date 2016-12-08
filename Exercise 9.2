@@ -1,0 +1,30 @@
+;
+; Data & Code
+;
+
+.data
+
+.code
+	main:nop
+
+		invoke version
+		mov ebp,esp
+
+	inputLoop:
+		invoke readInteger		;read in input into eax in loop
+		cmp eax,0				;if neg number end input
+		jl outputLoop
+		push eax				;push input number onto stack
+		jmp inputLoop
+	
+	outputLoop:
+		cmp ebp,esp				;are we at the bottom of the stack? (ebp == esp)?
+		je outputEnd			;if so end program
+		pop	eax					;otherwise pop off top of stack into eax and print eax
+		invoke writeInteger,eax
+		jmp outputLoop			;loop the output until bottom of the stack
+	
+	outputEnd:
+		invoke ExitProcess,0	;finish
+
+	end main
