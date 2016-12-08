@@ -1,0 +1,57 @@
+Write a program that will input a string containing
+an expression in Reverse Polish Notation (RPN) and output its value.
+Exercise 9.1
+;
+; Data & Code
+;
+
+.data
+
+.code
+	main:nop
+		push ebp		;Create a stack frame
+		mov ebp,esp
+		invoke readRPN		;read RPN string
+		mov esi,eax		;store string in esi
+		mov ecx,0		;Set ecx counter to zero
+
+	getStack:
+		movzx edx, byte ptr [esi + ecx]	;store character of string in edx and zero-extend to DWORD ecx is counter for chars
+		cmp edx,0		;Check if there are any more chars to read from the RPN string
+		jg checkChar	;if there more chars check them
+		jmp finish		;otherwise we pop off the top and finish
+	
+	checkChar:	
+		cmp edx,43		;Check if character is ASCII value '+', if so jump to addition operation
+		je addition		
+		cmp edx,45		;Check if char is ASCII value of '-', if so jump
+		je subtraction
+		sub edx,48		;otherwise subtract 48 from the number to get an int
+		push edx		;push onto stack
+		inc ecx			;increment counter to get next char from the RPN string
+		jmp getStack
+	
+	addition:
+		pop edx			;pop the first two numbers off the top
+		mov ebx,edx
+		pop edx
+		add ebx,edx		;add them and push the answer back onto the stack
+		push ebx
+		inc ecx			;increment char counter
+		jmp getStack	;loop
+
+	subtraction:		;same as above
+		pop edx
+		mov ebx,edx
+		pop edx
+		sub edx,ebx		;edx = edx - ebx
+		push edx		;put result on top of stack
+		inc ecx			;inc char counter
+		jmp getStack	;loop
+
+	finish:
+		pop eax			;final answer should be on top of the stack, pop it into eax
+		invoke checkRPN,eax	;check if the answer is correct
+		invoke ExitProcess,0	;finish :)
+
+	end main
