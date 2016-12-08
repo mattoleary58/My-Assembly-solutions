@@ -1,0 +1,59 @@
+main.asm
+;
+; Data & Code
+;
+EXTERNDEF sumArray:NEAR
+
+.data
+array		DWORD	10 DUP (1,1,1,1,1,1,1,1,1,1)
+printSum	BYTE	'The sum of the array is: %d', 13, 10, 0
+
+.code
+	main:nop
+
+		push OFFSET array
+		push LENGTH array
+		call sumArray
+		invoke crt_printf, ADDR printSum, eax
+		invoke ExitProcess,0
+
+	end main
+
+
+sumArray.asm
+;
+; Data & Code
+;
+EXTERNDEF sumArray:NEAR
+
+.data
+i		DWORD	0
+sum		DWORD	0
+
+.code
+	main:nop
+
+	sumArray:
+		push ebp
+		mov ebp,esp
+		mov ebx,[ebp + 8]	;ebx == Length of array
+		mov ecx,[ebp + 12]	;ecx == Address of array
+
+	sumLoop:
+		cmp i,ebx			;i < array.size
+		jge endLoop
+		mov eax,i			;puts index in eax
+		mov edx, 4			;TYPE - in this case 4 bytes
+		mul edx				;i*4
+		add eax, ecx		;(i*4) + address of array
+		invoke map,[eax]	;will leave the value of map(x) in eax
+		add sum, eax		;sum = sum + eax
+		inc i				;i++
+		jmp sumLoop
+
+	endLoop:
+		mov eax,sum			;move sum into eax to return it
+		pop ebp
+		ret 8				;return 4* the number of params i.e 2
+
+	end
